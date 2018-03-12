@@ -1,133 +1,139 @@
-import React, { Component} from 'react';
+import React, { Component } from 'react';
 import $ from 'jquery';
 import InputCustomizado from './components/InputCustomizado.js';
 import TrataErros from './TrataErros';
 import PubSub from 'pubsub-js';
 
+
 class FormularioAutor extends Component {
-    constructor(){
+    constructor() {
         super();
-        this.state = {lista: [], nome:'', email: '', senha:''};
-    this.enviaForm = this.enviaForm.bind(this);
-    this.setNome = this.setNome.bind(this);
-    this.setEmail = this.setEmail.bind(this);
-    this.setSenha = this.setSenha.bind(this);
+        this.state = { lista: [], nome: '', email: '', senha: '' };
+        this.enviaForm = this.enviaForm.bind(this);
+        this.setNome = this.setNome.bind(this);
+        this.setEmail = this.setEmail.bind(this);
+        this.setSenha = this.setSenha.bind(this);
     }
 
-    enviaForm(evento){
+    enviaForm(evento) {
         evento.preventDefault();
         $.ajax({
-          url :'http://localhost:8080/api/autores',
-          contentType: 'application/json',
-          dataType: 'json',
-          type: 'post',
-          data: JSON.stringify({nome:this.state.nome, email:this.state.email, senha: this.state.senha}),
-          success: function(novaListagem){
-              PubSub.publish('atualiza-lista-autores', novaListagem);
-            this.setState({nome:'', email:'', senha:''});
-          }.bind(this),
-          error: function(resposta){
-            if(resposta.status === 400){
-                new TrataErros().publicaErros(resposta.responseJSON);
-            }
-          },
+            url: 'http://localhost:8080/api/autores',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'post',
+            data: JSON.stringify({ nome: this.state.nome, email: this.state.email, senha: this.state.senha }),
+            success: function (novaListagem) {
+                PubSub.publish('atualiza-lista-autores', novaListagem);
+                this.setState({ nome: '', email: '', senha: '' });
+            }.bind(this),
+            error: function (resposta) {
+                if (resposta.status === 400) {
+                    new TrataErros().publicaErros(resposta.responseJSON);
+                }
+            },
 
-          beforeSend: function(){
-              PubSub.publish('limpa-erros',{});
-          }
-          
+            beforeSend: function () {
+                PubSub.publish('limpa-erros', {});
+            }
+
         });
     }
 
-    setNome(evento){
-        this.setState({nome:evento.target.value});
+    setNome(evento) {
+        this.setState({ nome: evento.target.value });
     }
 
-    setEmail(evento){
-        this.setState({email:evento.target.value});
+    setEmail(evento) {
+        this.setState({ email: evento.target.value });
     }
 
-    setSenha(evento){
-        this.setState({senha:evento.target.value});
+    setSenha(evento) {
+        this.setState({ senha: evento.target.value });
     }
 
-    render(){
-        return(
-            
-              <div className="pure-form pure-form-aligned">
+    render() {
+        return (
+
+            <div className="pure-form pure-form-aligned">
                 <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
-                  <InputCustomizado id="nome" type="text" name="nome" value={this.state.value} onChange={this.setNome} label="Nome" />
-                  <InputCustomizado id="email" type="email" name="email" value={this.state.value} onChange={this.setEmail} label="Email" />
-                  <InputCustomizado id="senha" type="password" name="senha" value={this.state.value} onChange={this.setSenha} label="Senha" />
-                  <div className="pure-control-group">                                  
-                    <label></label> 
-                    <button type="submit" className="pure-button pure-button-primary">Gravar</button>                                    
-                  </div>
-                </form>             
+                    <InputCustomizado id="nome" type="text" name="nome" value={this.state.value} onChange={this.setNome} label="Nome" />
+                    <InputCustomizado id="email" type="email" name="email" value={this.state.value} onChange={this.setEmail} label="Email" />
+                    <InputCustomizado id="senha" type="password" name="senha" value={this.state.value} onChange={this.setSenha} label="Senha" />
+                    <div className="pure-control-group">
+                        <label></label>
+                        <button type="submit" className="pure-button pure-button-primary">Gravar</button>
+                    </div>
+                </form>
 
-              </div>
+            </div>
 
         );
     }
-    
+
 }
 
 class TabelaAutores extends Component {
-    render(){
-        return(
-            <div>            
+    render() {
+        return (
+            <div>
                 <table className="pure-table">
-                  <thead>
-                    <tr>
-                      <th>Nome</th>
-                      <th>email</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      this.props.lista.map(function (autor) {
-                        return(
-                          <tr key = {autor.id}>
-                            <td>{autor.nome}</td>
-                            <td>{autor.email}</td>
-                          </tr>
-                        );
-                        
-                      })
-                    }
-                  </tbody>
-                </table> 
-            </div>   
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            this.props.lista.map(function (autor) {
+                                return (
+                                    <tr key={autor.id}>
+                                        <td>{autor.nome}</td>
+                                        <td>{autor.email}</td>
+                                    </tr>
+                                );
+
+                            })
+                        }
+                    </tbody>
+                </table>
+            </div>
         );
     }
 }
 
 export default class AutorBox extends Component {
-    constructor(){
+    constructor() {
         super();
-        this.state = {lista: []};
+        this.state = { lista: [] };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         $.ajax({
-          url: 'http://localhost:8080/api/autores',
-          dataType: 'json',
-          success: function(resposta){
-            this.setState({lista:resposta});
-          }.bind(this)
+            url: 'http://localhost:8080/api/autores',
+            dataType: 'json',
+            success: function (resposta) {
+                this.setState({ lista: resposta });
+            }.bind(this)
         });
 
-        PubSub.subscribe('atualiza-lista-autores', function(topico, novaLista){
-                this.setState({lista:novaLista});
-            }.bind(this)
+        PubSub.subscribe('atualiza-lista-autores', function (topico, novaLista) {
+            this.setState({ lista: novaLista });
+        }.bind(this)
         );
     }
 
-    render(){
-        return(
+    render() {
+        return (
             <div>
-                <FormularioAutor/>
-                <TabelaAutores lista= {this.state.lista}/>
+                <div className="header">
+                    <h1>Cadastro de Autores</h1>
+                </div>
+                <div className="content" id="content">                
+                    <FormularioAutor />
+                    <TabelaAutores lista={this.state.lista} />
+                </div>
             </div>
         );
     }
